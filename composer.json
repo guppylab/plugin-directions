@@ -6,8 +6,8 @@
     "keywords": ["nativephp", "mobile", "directions", "routing", "distance", "eta", "mapkit"],
     "authors": [
         {
-            "name": "Keepcloud",
-            "email": "dev@keepcloud.com.br"
+            "name": "Guppylab",
+            "email": "edison.filho@keepcloud.io"
         }
     ],
     "require": {

@@ -1,6 +1,6 @@
 {
     "name": "guppylab/plugin-directions",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "description": "Real-route distance and travel time (MapKit on iOS) to multiple destinations",
     "namespace": "Directions",
     "keywords": ["directions", "routing", "distance", "eta", "mapkit"],
@@ -10,8 +10,8 @@
         "type": "free"
     },
     "author": {
-        "name": "Keepcloud",
-        "email": "dev@keepcloud.com.br",
+        "name": "Guppylab",
+        "email": "edison.filho@keepcloud.io",
         "url": "https://github.com/guppylab"
     },
     "homepage": "https://github.com/guppylab/plugin-directions",
