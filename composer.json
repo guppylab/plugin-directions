@@ -2,7 +2,6 @@
     "name": "keepcloud/plugin-directions",
     "description": "Real-route distance and ETA (MapKit on iOS) to multiple destinations, for NativePHP Mobile",
     "type": "nativephp-plugin",
-    "version": "1.0.0",
     "license": "MIT",
     "keywords": ["nativephp", "mobile", "directions", "routing", "distance", "eta", "mapkit"],
     "authors": [

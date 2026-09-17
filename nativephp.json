@@ -1,6 +1,6 @@
 {
     "name": "keepcloud/plugin-directions",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Real-route distance and travel time (MapKit on iOS) to multiple destinations",
     "namespace": "Directions",
     "keywords": ["directions", "routing", "distance", "eta", "mapkit"],
