@@ -1,6 +1,6 @@
 <?php
 
-namespace Keepcloud\Directions\Events;
+namespace Guppylab\Directions\Events;
 
 use Illuminate\Foundation\Events\Dispatchable;
 

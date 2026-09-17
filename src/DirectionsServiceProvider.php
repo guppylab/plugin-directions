@@ -1,6 +1,6 @@
 <?php
 
-namespace Keepcloud\Directions;
+namespace Guppylab\Directions;
 
 use Illuminate\Support\ServiceProvider;
 

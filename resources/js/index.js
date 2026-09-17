@@ -38,7 +38,7 @@ export async function distances(originLat, originLng, destinations, options = {}
         origin: { lat: originLat, lng: originLng },
         destinations,
         transport: options.transport ?? 'automobile',
-        event: 'Keepcloud\\Directions\\Events\\DistancesReceived',
+        event: 'Guppylab\\Directions\\Events\\DistancesReceived',
     });
 
     return { success: true };

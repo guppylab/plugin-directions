@@ -25,7 +25,7 @@ describe('Plugin Manifest', function () {
         $manifest = json_decode(file_get_contents($this->manifestPath), true);
 
         expect($manifest)->toHaveKeys(['name', 'namespace', 'bridge_functions']);
-        expect($manifest['name'])->toBe('keepcloud/plugin-directions');
+        expect($manifest['name'])->toBe('guppylab/plugin-directions');
         expect($manifest['namespace'])->toBe('Directions');
     });
 
@@ -35,13 +35,13 @@ describe('Plugin Manifest', function () {
         $fn = $manifest['bridge_functions'][0];
         expect($fn['name'])->toBe('Directions.Distances');
         expect($fn['ios'])->toBe('DirectionsFunctions.Distances');
-        expect($fn['android'])->toBe('com.keepcloud.plugins.directions.DirectionsFunctions.Distances');
+        expect($fn['android'])->toBe('com.guppylab.plugins.directions.DirectionsFunctions.Distances');
     });
 
     it('declares its event under the plugin namespace', function () {
         $manifest = json_decode(file_get_contents($this->manifestPath), true);
 
-        expect($manifest['events'])->toBe(['Keepcloud\Directions\Events\DistancesReceived']);
+        expect($manifest['events'])->toBe(['Guppylab\Directions\Events\DistancesReceived']);
     });
 });
 
@@ -59,28 +59,28 @@ describe('Native Code', function () {
         expect(file_exists($this->kotlinFile))->toBeTrue();
 
         $content = file_get_contents($this->kotlinFile);
-        expect($content)->toContain('package com.keepcloud.plugins.directions');
+        expect($content)->toContain('package com.guppylab.plugins.directions');
         expect($content)->toContain('object DirectionsFunctions');
         expect($content)->toContain('BridgeFunction');
     });
 });
 
 describe('PHP Classes', function () {
-    it('has the service provider under Keepcloud\\Directions', function () {
+    it('has the service provider under Guppylab\\Directions', function () {
         $content = file_get_contents($this->pluginPath.'/src/DirectionsServiceProvider.php');
-        expect($content)->toContain('namespace Keepcloud\Directions');
+        expect($content)->toContain('namespace Guppylab\Directions');
         expect($content)->toContain('class DirectionsServiceProvider');
     });
 
     it('has the facade', function () {
         $content = file_get_contents($this->pluginPath.'/src/Facades/Directions.php');
-        expect($content)->toContain('namespace Keepcloud\Directions\Facades');
+        expect($content)->toContain('namespace Guppylab\Directions\Facades');
         expect($content)->toContain('class Directions extends Facade');
     });
 
     it('has the main implementation class', function () {
         $content = file_get_contents($this->pluginPath.'/src/Directions.php');
-        expect($content)->toContain('namespace Keepcloud\Directions');
+        expect($content)->toContain('namespace Guppylab\Directions');
         expect($content)->toContain('function distances');
     });
 });
@@ -101,10 +101,10 @@ describe('Composer Configuration', function () {
         $composer = json_decode(file_get_contents($this->pluginPath.'/composer.json'), true);
 
         expect(json_last_error())->toBe(JSON_ERROR_NONE);
-        expect($composer['name'])->toBe('keepcloud/plugin-directions');
+        expect($composer['name'])->toBe('guppylab/plugin-directions');
         expect($composer['type'])->toBe('nativephp-plugin');
         expect($composer['extra']['nativephp']['manifest'])->toBe('nativephp.json');
         expect($composer['extra']['laravel']['providers'])
-            ->toBe(['Keepcloud\Directions\DirectionsServiceProvider']);
+            ->toBe(['Guppylab\Directions\DirectionsServiceProvider']);
     });
 });

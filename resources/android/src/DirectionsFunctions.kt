@@ -1,4 +1,4 @@
-package com.keepcloud.plugins.directions
+package com.guppylab.plugins.directions
 
 import android.content.Context
 import com.nativephp.mobile.bridge.BridgeFunction

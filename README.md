@@ -12,8 +12,8 @@ straight-line (haversine) estimate in your app.
 ## Installation
 
 ```bash
-composer require keepcloud/plugin-directions
-php artisan native:plugin:register keepcloud/plugin-directions
+composer require guppylab/plugin-directions
+php artisan native:plugin:register guppylab/plugin-directions
 php artisan native:run   # rebuild the native project
 ```
 
@@ -23,8 +23,8 @@ The call is **asynchronous**: it returns immediately and the result arrives as
 a native event. Handle it with `#[OnNative(DistancesReceived::class)]`.
 
 ```php
-use Keepcloud\Directions\Facades\Directions;
-use Keepcloud\Directions\Events\DistancesReceived;
+use Guppylab\Directions\Facades\Directions;
+use Guppylab\Directions\Events\DistancesReceived;
 use Native\Mobile\Attributes\OnNative;
 
 class NearbyStores extends \Livewire\Component
@@ -55,7 +55,7 @@ class NearbyStores extends \Livewire\Component
 ## Usage (JavaScript / Inertia — Vue or React)
 
 ```js
-import { distances, onDistances } from 'keepcloud-plugin-directions';
+import { distances, onDistances } from 'guppylab-plugin-directions';
 
 const unsubscribe = onDistances((rows, id) => {
     // rows: [{ id: 'store-1', meters: 1234, seconds: 180, ok: true }, ...]
@@ -81,7 +81,7 @@ Triggers the calculation. `$destinations` is a list of
 `['id' => string|int, 'lat' => float, 'lng' => float]`. Returns `true` when the
 native call was dispatched (`false` outside the native runtime).
 
-### Event: `Keepcloud\Directions\Events\DistancesReceived`
+### Event: `Guppylab\Directions\Events\DistancesReceived`
 
 | Property | Type | Description |
 |---|---|---|

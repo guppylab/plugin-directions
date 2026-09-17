@@ -1,4 +1,4 @@
-## keepcloud/plugin-directions
+## guppylab/plugin-directions
 
 Real-route distance and travel time (ETA) from one origin to multiple
 destinations. iOS uses MapKit `MKDirections` (on-device, no API key, no cost).
@@ -12,7 +12,7 @@ arrives as a native event.
 
 @verbatim
 <code-snippet name="Requesting distances" lang="php">
-use Keepcloud\Directions\Facades\Directions;
+use Guppylab\Directions\Facades\Directions;
 
 Directions::distances(
     originLat: -22.2171,
@@ -29,7 +29,7 @@ Directions::distances(
 
 @verbatim
 <code-snippet name="Receiving the results" lang="php">
-use Keepcloud\Directions\Events\DistancesReceived;
+use Guppylab\Directions\Events\DistancesReceived;
 use Native\Mobile\Attributes\OnNative;
 
 // The #[OnNative] attribute must live on the component class, not on a trait.
@@ -47,7 +47,7 @@ public function onDistances(string $results, ?string $id = null): void
 
 @verbatim
 <code-snippet name="Requesting and receiving in JS" lang="js">
-import { distances, onDistances } from 'keepcloud-plugin-directions';
+import { distances, onDistances } from 'guppylab-plugin-directions';
 
 const unsubscribe = onDistances((rows, id) => {
     // rows: [{ id: 'store-1', meters: 1234, seconds: 180, ok: true }, ...]

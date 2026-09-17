@@ -1,8 +1,8 @@
 <?php
 
-namespace Keepcloud\Directions;
+namespace Guppylab\Directions;
 
-use Keepcloud\Directions\Events\DistancesReceived;
+use Guppylab\Directions\Events\DistancesReceived;
 
 class Directions
 {

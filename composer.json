@@ -1,5 +1,5 @@
 {
-    "name": "keepcloud/plugin-directions",
+    "name": "guppylab/plugin-directions",
     "description": "Real-route distance and ETA (MapKit on iOS) to multiple destinations, for NativePHP Mobile",
     "type": "nativephp-plugin",
     "license": "MIT",
@@ -16,13 +16,13 @@
     },
     "autoload": {
         "psr-4": {
-            "Keepcloud\\Directions\\": "src/"
+            "Guppylab\\Directions\\": "src/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Keepcloud\\Directions\\DirectionsServiceProvider"
+                "Guppylab\\Directions\\DirectionsServiceProvider"
             ]
         },
         "nativephp": {
