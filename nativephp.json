@@ -12,10 +12,10 @@
     "author": {
         "name": "Keepcloud",
         "email": "dev@keepcloud.com.br",
-        "url": "https://github.com/keepcloud"
+        "url": "https://github.com/guppylab"
     },
-    "homepage": "https://github.com/keepcloud/plugin-directions",
-    "repository": "https://github.com/keepcloud/plugin-directions",
+    "homepage": "https://github.com/guppylab/plugin-directions",
+    "repository": "https://github.com/guppylab/plugin-directions",
     "funding": [],
     "platforms": [
         "android",
