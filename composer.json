@@ -20,7 +20,7 @@
         }
     ],
     "require": {
-        "php": "^8.2",
+        "php": "^8.3",
         "nativephp/mobile": "^3.0"
     },
     "autoload": {
