@@ -1,9 +1,18 @@
 {
     "name": "guppylab/plugin-directions",
-    "description": "Real-route distance and ETA (MapKit on iOS) to multiple destinations, for NativePHP Mobile",
+    "description": "Real-route distance and ETA to multiple destinations for NativePHP Mobile: MapKit on iOS, OSRM on Android",
     "type": "nativephp-plugin",
     "license": "MIT",
-    "keywords": ["nativephp", "mobile", "directions", "routing", "distance", "eta", "mapkit"],
+    "keywords": [
+        "nativephp",
+        "mobile",
+        "directions",
+        "routing",
+        "distance",
+        "eta",
+        "mapkit",
+        "osrm"
+    ],
     "authors": [
         {
             "name": "Guppylab",
@@ -30,10 +39,13 @@
         }
     },
     "require-dev": {
-        "pestphp/pest": "^3.0"
+        "pestphp/pest": "^3.0",
+        "laravel/pint": "^1.32"
     },
     "scripts": {
-        "test": "pest"
+        "test": "pest",
+        "lint": "pint",
+        "lint:test": "pint --test"
     },
     "config": {
         "allow-plugins": {
