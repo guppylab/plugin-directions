@@ -60,13 +60,14 @@ object DirectionsFunctions {
             val provider = parameters["provider"] as? JSONObject
             val providerType = (provider?.optString("type") ?: "none").lowercase()
             val baseUrl = provider?.optString("url")?.takeIf { it.isNotEmpty() }?.trimEnd('/')
+            val headers = parseHeaders(provider?.optJSONObject("headers"))
             val profile = resolveProfile(provider?.optJSONObject("profiles"), transport)
 
             executor.execute {
                 val rows = when {
                     destinations.isEmpty() -> emptyList()
                     providerType == "osrm" && !baseUrl.isNullOrEmpty() ->
-                        routeWithOsrm(baseUrl, profile, originLat, originLng, destinations, timeoutMs)
+                        routeWithOsrm(baseUrl, profile, originLat, originLng, destinations, timeoutMs, headers)
                     else -> destinations.map { unroutable(it.id, "unsupported") }
                 }
 
@@ -135,11 +136,12 @@ object DirectionsFunctions {
         originLng: Double,
         destinations: List<Destination>,
         timeoutMs: Int,
+        headers: Map<String, String>,
     ): List<JSONObject> {
-        tableRoute(baseUrl, profile, originLat, originLng, destinations, timeoutMs)?.let { return it }
+        tableRoute(baseUrl, profile, originLat, originLng, destinations, timeoutMs, headers)?.let { return it }
 
         return destinations.map { destination ->
-            singleRoute(baseUrl, profile, originLat, originLng, destination, timeoutMs)
+            singleRoute(baseUrl, profile, originLat, originLng, destination, timeoutMs, headers)
         }
     }
 
@@ -151,6 +153,7 @@ object DirectionsFunctions {
         originLng: Double,
         destinations: List<Destination>,
         timeoutMs: Int,
+        headers: Map<String, String>,
     ): List<JSONObject>? {
         // OSRM takes coordinates as lng,lat — the opposite order of the payload.
         val coordinates = buildString {
@@ -161,7 +164,7 @@ object DirectionsFunctions {
         val url = "$baseUrl/table/v1/$profile/$coordinates" +
             "?sources=0&annotations=duration,distance"
 
-        val body = get(url, timeoutMs) ?: return null
+        val body = get(url, timeoutMs, headers) ?: return null
         val json = runCatching { JSONObject(body) }.getOrNull() ?: return null
 
         if (json.optString("code") != "Ok") {
@@ -195,12 +198,13 @@ object DirectionsFunctions {
         originLng: Double,
         destination: Destination,
         timeoutMs: Int,
+        headers: Map<String, String>,
     ): JSONObject {
         val url = "$baseUrl/route/v1/$profile/" +
             "${coordinate(originLng, originLat)};${coordinate(destination.lng, destination.lat)}" +
             "?overview=false&alternatives=false"
 
-        val body = get(url, timeoutMs) ?: return unroutable(destination.id, "failed")
+        val body = get(url, timeoutMs, headers) ?: return unroutable(destination.id, "failed")
         val json = runCatching { JSONObject(body) }.getOrNull()
             ?: return unroutable(destination.id, "failed")
 
@@ -216,8 +220,13 @@ object DirectionsFunctions {
 
     // MARK: - Helpers
 
-    private fun get(url: String, timeoutMs: Int): String? {
+    private fun get(url: String, timeoutMs: Int, headers: Map<String, String> = emptyMap()): String? {
         var connection: HttpURLConnection? = null
+        val credentialsAllowed = headers.isEmpty() || headersAllowedFor(url)
+
+        if (headers.isNotEmpty() && !credentialsAllowed) {
+            Log.w(TAG, "Dropping routing headers: the endpoint is plain http on a routable host")
+        }
 
         return try {
             connection = (URL(url).openConnection() as HttpURLConnection).apply {
@@ -225,6 +234,10 @@ object DirectionsFunctions {
                 connectTimeout = timeoutMs
                 readTimeout = timeoutMs
                 setRequestProperty("Accept", "application/json")
+
+                if (credentialsAllowed) {
+                    headers.forEach { (name, value) -> setRequestProperty(name, value) }
+                }
             }
 
             if (connection.responseCode !in 200..299) {
@@ -238,6 +251,64 @@ object DirectionsFunctions {
             null
         } finally {
             connection?.disconnect()
+        }
+    }
+
+    /**
+     * Headers configured by the app, dropped when blank.
+     *
+     * An `Authorization:` header with an empty value reads as a malformed
+     * credential to most gateways, which answer 400 rather than the 401 that
+     * would say what is wrong.
+     */
+    private fun parseHeaders(raw: JSONObject?): Map<String, String> {
+        val source = raw ?: return emptyMap()
+
+        return source.keys().asSequence().mapNotNull { key ->
+            val value = source.optString(key)
+
+            if (key.isEmpty() || value.isEmpty()) null else key to value
+        }.toMap()
+    }
+
+    /**
+     * Whether a credential may ride along with a request to this URL.
+     *
+     * These headers carry a token for the app's own routing endpoint. Over
+     * plain http to a routable host that token is readable by anyone on the
+     * path, so it is left off — the request still goes out and the endpoint
+     * answers 401, which is a failure someone will notice, unlike a token
+     * leaking quietly. Plain http to a loopback or private address stays
+     * allowed so the emulator can reach a laptop during development.
+     */
+    internal fun headersAllowedFor(url: String): Boolean {
+        val parsed = runCatching { URL(url) }.getOrNull() ?: return false
+
+        if (parsed.protocol.equals("https", ignoreCase = true)) {
+            return true
+        }
+
+        return isPrivateHost(parsed.host.orEmpty())
+    }
+
+    private fun isPrivateHost(host: String): Boolean {
+        if (host.equals("localhost", ignoreCase = true) || host == "::1") {
+            return true
+        }
+
+        val octets = host.split('.').mapNotNull { it.toIntOrNull() }
+
+        if (octets.size != 4 || octets.any { it !in 0..255 }) {
+            return false
+        }
+
+        return when {
+            // 10.0.2.2, the emulator's alias for the host machine, is in 10/8.
+            octets[0] == 127 -> true
+            octets[0] == 10 -> true
+            octets[0] == 192 && octets[1] == 168 -> true
+            octets[0] == 172 && octets[1] in 16..31 -> true
+            else -> false
         }
     }
 

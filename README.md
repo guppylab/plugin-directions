@@ -6,7 +6,7 @@ destinations.
 | | Engine | Cost | Setup |
 |---|---|---|---|
 | **iOS** | MapKit `MKDirections` (iOS 15+) | free, on-device | none |
-| **Android** | OSRM over HTTP | your own server | set `DIRECTIONS_OSRM_URL` |
+| **Android** | OSRM-shaped HTTP endpoint | your own server | set `DIRECTIONS_OSRM_URL` |
 
 Android has no free on-device routing engine, so routing there is opt-in and
 server backed. **Both platforms always answer**: destinations that could not be
@@ -37,6 +37,46 @@ There is deliberately no default URL. The public demo server
 (`router.project-osrm.org`) is not allowed for production use by the OSRM
 project, so the plugin will not quietly point your app at it. Run your own
 `osrm-backend`, or leave the provider as `none` and use the fallback.
+
+### Pointing it at your own backend
+
+`url` does not have to be an `osrm-backend` instance — anything answering the
+OSRM `table`/`route` shape will do, and your own API is usually the better
+target:
+
+```
+device ──► https://api.example.com/routing/table/v1/driving/{coords}
+                 │  cache by area, rate limit, hold the provider key
+                 └──► OSRM, or a commercial matrix API
+```
+
+Three things this buys you. The provider key never ships in the bundle, where
+anyone holding the APK can read it. Results can be cached per area, and users
+cluster, so a handful of upstream calls serves a whole city. And the upstream
+provider can be swapped without a new release.
+
+Authenticate against it with `headers`:
+
+```dotenv
+DIRECTIONS_OSRM_URL=https://api.example.com/routing
+DIRECTIONS_OSRM_TOKEN=a-scoped-revocable-token
+```
+
+```php
+// config/directions.php
+'headers' => array_filter([
+    'Authorization' => env('DIRECTIONS_OSRM_TOKEN')
+        ? 'Bearer '.env('DIRECTIONS_OSRM_TOKEN')
+        : null,
+]),
+```
+
+Whatever goes in `headers` is readable by whoever holds the build, so it should
+be a credential scoped to that endpoint and revocable on its own — never a
+provider key you would not hand out. Android refuses to send these over plain
+`http` to a routable host (the request still goes out unauthenticated, so you
+get a 401 rather than a silent leak); `http` to a loopback or private address
+stays allowed for local development.
 
 ## Usage (PHP / Livewire)
 
@@ -132,7 +172,9 @@ why `max_destinations` defaults to 25.
 **Android.** The OSRM `table` service answers the whole batch in one request.
 Servers may disable it or cap `max-table-size`, in which case the plugin falls
 back to one `/route` request per destination. Requires `INTERNET`, which the
-plugin declares.
+plugin declares. There is no on-device alternative: Play Services Location only
+positions, the Maps SDK only renders, and the `google.navigation:` intent hands
+the user to the Maps app without returning anything to you.
 
 ## License
 

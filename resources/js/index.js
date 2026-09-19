@@ -53,17 +53,23 @@ async function bridgeCall(method, params = {}) {
  * `setProvider()` once at boot. Without it Android reports every destination as
  * `unsupported` instead of routing.
  */
-let defaultProvider = { type: 'none', url: null, profiles: {} };
+let defaultProvider = { type: 'none', url: null, headers: {}, profiles: {} };
 
 /**
  * Set the routing provider used by subsequent calls.
  *
- * @param {{ type: 'none' | 'osrm', url?: string | null, profiles?: Record<string, string> }} provider
+ * `headers` authenticates against the routing endpoint — the usual shape is the
+ * app's own backend proxying a provider, so the provider key never reaches the
+ * device. Android leaves these off a plain-http request to a routable host, so
+ * the endpoint has to be https outside development.
+ *
+ * @param {{ type: 'none' | 'osrm', url?: string | null, headers?: Record<string, string>, profiles?: Record<string, string> }} provider
  */
 export function setProvider(provider) {
     defaultProvider = {
         type: provider?.type ?? 'none',
         url: provider?.url ?? null,
+        headers: provider?.headers ?? {},
         profiles: provider?.profiles ?? {},
     };
 }

@@ -97,7 +97,7 @@ class Directions
      * Routing configuration handed to the native side. iOS ignores it (MapKit
      * needs nothing); Android uses it to decide whether it can route at all.
      *
-     * @return array{type:string,url:?string,profiles:array<string,string>}
+     * @return array{type:string,url:?string,headers:array<string,string>,profiles:array<string,string>}
      */
     public function providerConfig(): array
     {
@@ -107,11 +107,40 @@ class Directions
         return [
             'type' => $url ? $type : 'none',
             'url' => $url ? rtrim((string) $url, '/') : null,
+            'headers' => $url ? $this->providerHeaders() : [],
             'profiles' => (array) config('directions.android.osrm.profiles', [
                 self::AUTOMOBILE => 'driving',
                 self::WALKING => 'foot',
             ]),
         ];
+    }
+
+    /**
+     * Headers sent with every routing request, as strings.
+     *
+     * Empty values are dropped rather than sent blank: an `Authorization:`
+     * header with nothing after it reads as a malformed credential to most
+     * gateways, which answer 400 instead of the 401 that would explain it.
+     *
+     * @return array<string,string>
+     */
+    protected function providerHeaders(): array
+    {
+        $headers = [];
+
+        foreach ((array) config('directions.android.osrm.headers', []) as $name => $value) {
+            if (! is_string($name) || $name === '' || $value === null || $value === '') {
+                continue;
+            }
+
+            if (is_array($value) || is_object($value)) {
+                continue;
+            }
+
+            $headers[$name] = (string) $value;
+        }
+
+        return $headers;
     }
 
     /**

@@ -113,6 +113,25 @@ describe('Native Code', function () {
         expect($content)->toContain('"unsupported"');
     });
 
+    it('sends the configured headers on Android routing requests', function () {
+        // A routing endpoint that is the app's own proxy needs a credential;
+        // without this the proxy has to be left open to the internet.
+        $content = file_get_contents($this->kotlinFile);
+
+        expect($content)->toContain('parseHeaders');
+        expect($content)->toContain('setRequestProperty(');
+    });
+
+    it('does not send credentials over cleartext to a public host on Android', function () {
+        // Headers carry a bearer token. Sending it over http to a routable host
+        // hands it to anyone on the path, so it is dropped there — while plain
+        // http to a loopback/private address stays usable for development.
+        $content = file_get_contents($this->kotlinFile);
+
+        expect($content)->toContain('fun headersAllowedFor');
+        expect($content)->toContain('https');
+    });
+
     it('reads bridge parameters as org.json values on Android', function () {
         // BridgeRouter hands parameters over raw, so nested objects arrive as
         // JSONObject and arrays as JSONArray — casting them to Map/List fails.
@@ -147,6 +166,15 @@ describe('PHP Classes', function () {
         expect($content)->toContain('function isSupported');
     });
 
+    it('hands the routing headers to the native side', function () {
+        // providerConfig() is the only channel native code has to the config
+        // file; a header left out here can never reach the request.
+        $content = file_get_contents($this->pluginPath.'/src/Directions.php');
+
+        expect($content)->toContain("'headers' =>");
+        expect($content)->toContain('directions.android.osrm.headers');
+    });
+
     it('ships a publishable config', function () {
         // Read as source rather than evaluated: env() needs a booted app, and
         // what matters here is the shipped defaults, not a resolved value.
@@ -156,6 +184,7 @@ describe('PHP Classes', function () {
         expect($config)->toContain("'timeout' =>");
         expect($config)->toContain("'provider' =>");
         expect($config)->toContain("'osrm' =>");
+        expect($config)->toContain("'headers' =>");
     });
 
     it('does not default Android to the public OSRM demo server', function () {
@@ -195,6 +224,14 @@ describe('JavaScript Library', function () {
         expect($js)->toContain('const nativeResponse = result.data;');
         expect($js)->toContain("result.status === 'error'");
         expect($js)->toContain('X-CSRF-TOKEN');
+    });
+
+    it('carries the provider headers', function () {
+        $js = file_get_contents($this->pluginPath.'/resources/js/index.js');
+        $types = file_get_contents($this->pluginPath.'/resources/js/index.d.ts');
+
+        expect($js)->toContain('headers');
+        expect($types)->toContain('headers?:');
     });
 });
 

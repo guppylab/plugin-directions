@@ -59,6 +59,12 @@ return [
     |         allowed for production use by the OSRM project, so there is no
     |         default here on purpose — set your own.
     |
+    | `url` does not have to be an OSRM server — anything that answers the OSRM
+    | table/route shape will do. Pointing it at your own backend is usually the
+    | better deployment: the provider key stays on the server, results can be
+    | cached per area, and the provider can be swapped without shipping a new
+    | build. Use `headers` to authenticate against it.
+    |
     */
 
     'android' => [
@@ -68,6 +74,17 @@ return [
         'osrm' => [
 
             'url' => env('DIRECTIONS_OSRM_URL'),
+
+            // Sent on every routing request. Anything here is readable by
+            // whoever holds the build, so treat it as a scoped, revocable
+            // credential for your own endpoint — never a provider key you would
+            // not hand out. Android refuses to send these over plain http to a
+            // routable host, so the endpoint has to be https in production.
+            'headers' => array_filter([
+                'Authorization' => env('DIRECTIONS_OSRM_TOKEN')
+                    ? 'Bearer '.env('DIRECTIONS_OSRM_TOKEN')
+                    : null,
+            ]),
 
             // OSRM profile names are defined by whoever built the routing graph.
             // These are the defaults of a stock osrm-backend deployment.

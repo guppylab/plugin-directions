@@ -22,6 +22,13 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `over_limit`, `no_route`, `failed`.
 - `setProvider()` in the JS library, for handing the Android routing config over
   from the server.
+- `directions.android.osrm.headers`, sent with every Android routing request.
+  This is what makes an authenticated endpoint usable: point `url` at your own
+  backend and the provider key stays on the server, where it can also cache by
+  area and be swapped without shipping a new build. Android leaves the headers
+  off a plain-http request to a routable host, so a token cannot leak in the
+  clear; plain http to a loopback or private address still works for local
+  development.
 
 ### Fixed
 

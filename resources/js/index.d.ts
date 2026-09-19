@@ -27,6 +27,11 @@ export interface RoutingProvider {
     type: 'none' | 'osrm';
     /** Base URL of the routing server. Required when type is 'osrm'. */
     url?: string | null;
+    /**
+     * Sent with every routing request, e.g. { Authorization: 'Bearer ...' }.
+     * Android drops these on a plain-http request to a routable host.
+     */
+    headers?: Record<string, string>;
     /** Transport mode to provider profile, e.g. { automobile: 'driving', walking: 'foot' }. */
     profiles?: Record<string, string>;
 }
